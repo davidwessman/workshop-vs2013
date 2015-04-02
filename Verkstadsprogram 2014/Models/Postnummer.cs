@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace Verkstadsprogram_2014.Models
 {
@@ -104,5 +107,49 @@ namespace Verkstadsprogram_2014.Models
         {
             return base.GetHashCode();
         }
+        public static void export()
+        {
+            List<Postnummer> list = Databas.getAllPostnummer();
+            try
+            {
+                XmlDocument xDoc = new XmlDocument();
+                FolderBrowserDialog f = new FolderBrowserDialog();
+                DialogResult result = f.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string path = f.SelectedPath + "\\postalcodes.xml";
+                    if (!File.Exists(path))
+                    {
+                        XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8);
+                        xml.WriteStartElement("postalcodes");
+                        xml.WriteEndElement();
+                        xml.Close();
+                    }
+                    xDoc.Load(path);
+                    XmlNode xNode = xDoc.SelectSingleNode("postalcodes");
+                    xNode.RemoveAll();
+
+                    foreach (Postnummer p in list)
+                    {
+                        XmlNode xMain, xSub;
+                        xMain = xDoc.CreateElement("postalcode");
+
+                        (xSub = xDoc.CreateElement("id")).InnerText = p.ID.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("nbr")).InnerText = p.postnummer;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("city")).InnerText = p.ort;
+                        xMain.AppendChild(xSub);
+
+                        xDoc.DocumentElement.AppendChild(xMain);
+                    }
+                    xDoc.Save(path);
+                }
+            }
+            catch (SystemException ex) { System.Windows.Forms.MessageBox.Show(ex.ToString(), "Fel - sparning", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+        
     }
 }

@@ -584,6 +584,15 @@ namespace Verkstadsprogram_2014
             }
 
         }
+
+        private void buttonExport_Click(object sender, EventArgs e)
+        {            
+                Customer.export();
+                Hamtning.export();
+                Maskin.export();
+                Uppdrag.export();
+                Postnummer.export();                 
+        }
     }
         
 }

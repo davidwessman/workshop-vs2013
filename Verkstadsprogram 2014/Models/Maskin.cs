@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.IO;
+using System.Xml;
 
 namespace Verkstadsprogram_2014
 {
@@ -371,6 +372,71 @@ namespace Verkstadsprogram_2014
             { return "Ny maskin"; }
             string maskin = maskinID.Substring(maskinID.Length - 2);
             return maskin + " - " + brand + " - " + type;
+        }
+
+        public static void export()
+        {
+            List<Maskin> list = Databas.getMachines();
+            try
+            {
+                XmlDocument xDoc = new XmlDocument();
+                FolderBrowserDialog f = new FolderBrowserDialog();
+                DialogResult result = f.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string path = f.SelectedPath + "\\machines.xml";
+                    if (!File.Exists(path))
+                    {
+                        XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8);
+                        xml.WriteStartElement("machines");
+                        xml.WriteEndElement();
+                        xml.Close();
+                    }
+                    xDoc.Load(path);
+                    XmlNode xNode = xDoc.SelectSingleNode("machines");
+                    xNode.RemoveAll();
+
+                    foreach (Maskin p in list)
+                    {
+                        XmlNode xMain, xSub;
+                        xMain = xDoc.CreateElement("machine");
+
+                        (xSub = xDoc.CreateElement("id")).InnerText = p.maskinID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("inlagd")).InnerText = p.inlagd.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("changed")).InnerText = p.changed.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("brand")).InnerText = p.brand;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("type")).InnerText = p.type;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("serial_nbr")).InnerText = p.serialNbr;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("customer_id")).InnerText = p.customerID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("modell")).InnerText = p.modell;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("product_nbr")).InnerText = p.productNbr;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("production_year")).InnerText = p.productionYear;
+                        xMain.AppendChild(xSub);
+
+                        xDoc.DocumentElement.AppendChild(xMain);
+                    }
+                    xDoc.Save(path);
+                }
+            }
+            catch (SystemException ex) { System.Windows.Forms.MessageBox.Show(ex.ToString(), "Fel - sparning", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
     }
 }

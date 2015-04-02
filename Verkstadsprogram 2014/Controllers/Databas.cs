@@ -766,6 +766,47 @@ namespace Verkstadsprogram_2014
 
             }
         }
+        public static List<Maskin> getMachines()
+        {
+            try
+            {
+                List<Maskin> result = new List<Maskin>();
+                using (var databas = new SqlConnection(ConnectionString))
+                {
+                    SqlCommand command = databas.CreateCommand();
+                    command.CommandText = @"SELECT * FROM Maskiner";
+                    databas.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add( new Maskin(reader.GetString(0), reader.GetDateTime(1), reader.GetDateTime(2), reader.GetString(3), reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetDateTime(7), reader.GetBoolean(8), reader.GetString(9), reader.GetString(10), reader.GetString(11), reader.GetString(12), reader.GetString(13), reader.GetString(14)));
+                        }
+                    }
+                }
+
+                return result;
+
+            }
+            catch (SqlException ex) // This will catch all SQL exceptions
+            {
+                MessageBox.Show("Execute exception issue:getMachines " + ex.Message);
+                return null;
+            }
+            catch (InvalidOperationException ex) // This will catch SqlConnection Exception
+            {
+                MessageBox.Show("Connection Exception issue:getMachines " + ex.Message);
+                return null;
+            }
+             
+            //{
+            //    MessageBox.Show("Exception Message: " + ex.Message); //Will catch all Exception and write the message of the Exception but I do not recommend this to use.
+            //}
+            finally // don't forget to close your connection when exception occurs.
+            {
+
+            }
+        }
         #endregion
 
         #region Uppdrag
@@ -1044,6 +1085,47 @@ namespace Verkstadsprogram_2014
             finally // don't forget to close your connection when exception occurs.
             {
                  
+
+            }
+        }
+        public static List<Uppdrag> getAllUppdrag()
+        {
+            List<Uppdrag> searchUppdrag = new List<Uppdrag>();
+            try
+            {
+                using (var databas = new SqlConnection(ConnectionString))
+                {
+                    SqlCommand command = databas.CreateCommand();
+                    command.CommandText = @"SELECT * FROM Uppdrag";                    
+                    databas.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            searchUppdrag.Add(new Uppdrag(reader.GetString(0), reader.GetString(1), reader.GetDateTime(2), reader.GetString(3), reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetDateTime(7), reader.GetString(8), reader.GetBoolean(9), reader.GetDateTime(10), reader.GetString(11), reader.GetString(12), reader.GetBoolean(13), reader.GetDateTime(14), reader.GetString(15), reader.GetInt32(16), reader.GetString(17), reader.GetBoolean(18), reader.GetString(19), reader.GetString(20), reader.GetInt32(21), reader.GetString(22), reader.GetBoolean(23), reader.GetDateTime(24)));
+                        }
+                    }
+                }
+                return searchUppdrag;
+            }
+            catch (SqlException ex) // This will catch all SQL exceptions
+            {
+
+                MessageBox.Show("Execute exception issue: " + ex.Message);
+                return null;
+            }
+            catch (InvalidOperationException ex) // This will catch SqlConnection Exception
+            {
+                MessageBox.Show("Connection Exception issue: " + ex.Message);
+                return null;
+            }
+             
+            //{
+            //    MessageBox.Show("Exception Message: " + ex.Message); //Will catch all Exception and write the message of the Exception but I do not recommend this to use.
+            //}
+            finally // don't forget to close your connection when exception occurs.
+            {
+
 
             }
         }

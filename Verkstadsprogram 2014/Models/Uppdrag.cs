@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using System.Xml.Serialization;
 
 
@@ -254,6 +255,71 @@ namespace Verkstadsprogram_2014
         public static Uppdrag Find(string uppdragID)
         {
             return Databas.getUppdrag(uppdragID);
+        }
+
+        public static void export()
+        {
+            List<Uppdrag> list = Databas.getAllUppdrag();
+            try
+            {
+                XmlDocument xDoc = new XmlDocument();
+                FolderBrowserDialog f = new FolderBrowserDialog();
+                DialogResult result = f.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string path = f.SelectedPath + "\\works.xml";
+                    if (!File.Exists(path))
+                    {
+                        XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8);
+                        xml.WriteStartElement("works");
+                        xml.WriteEndElement();
+                        xml.Close();
+                    }
+                    xDoc.Load(path);
+                    XmlNode xNode = xDoc.SelectSingleNode("works");
+                    xNode.RemoveAll();
+
+                    foreach (Uppdrag p in list)
+                    {
+                        XmlNode xMain, xSub;
+                        xMain = xDoc.CreateElement("work");
+
+                        (xSub = xDoc.CreateElement("id")).InnerText = p.uppdragID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("machine_id")).InnerText = p.maskinID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("created")).InnerText = p.inlagd.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("work_activity")).InnerText = p.arbete.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("repair_comment")).InnerText = p.reparationSpec;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("notice")).InnerText = p.besked;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("finish_date")).InnerText = p.deadline.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("work_started")).InnerText = p.startat.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("work_start_date")).InnerText = p.arbeteStart.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("spare_parts")).InnerText = p.reservdelar.ToString();
+                        xMain.AppendChild(xSub);
+
+                        xDoc.DocumentElement.AppendChild(xMain);
+                    }
+                    xDoc.Save(path);
+                }
+            }
+            catch (SystemException ex) { System.Windows.Forms.MessageBox.Show(ex.ToString(), "Fel - sparning", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
     }
     public struct Arbete

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using Verkstadsprogram_2014.Models;
 
 namespace Verkstadsprogram_2014
@@ -247,6 +249,74 @@ namespace Verkstadsprogram_2014
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public static void export()
+        {
+            List<Hamtning> list = Databas.getHamtning(false, false, false, true);
+            try
+            {
+                XmlDocument xDoc = new XmlDocument();
+                FolderBrowserDialog f = new FolderBrowserDialog();
+                DialogResult result = f.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string path = f.SelectedPath + "\\pickups.xml";
+                    if (!File.Exists(path))
+                    {
+                        XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8);
+                        xml.WriteStartElement("pickups");
+                        xml.WriteEndElement();
+                        xml.Close();
+                    }
+                    xDoc.Load(path);
+                    XmlNode xNode = xDoc.SelectSingleNode("pickups");
+                    xNode.RemoveAll();
+
+                    foreach (Hamtning p in list)
+                    {
+                        XmlNode xMain, xSub;
+                        xMain = xDoc.CreateElement("pickup");
+
+                        (xSub = xDoc.CreateElement("id")).InnerText = p.ID.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("customer_id")).InnerText = p.customer.customerID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("brand")).InnerText = p.brand;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("type")).InnerText = p.type;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("modell")).InnerText = p.modell;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("pincode")).InnerText = p.pincode.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("comment")).InnerText = p.kommentar;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("created")).InnerText = p.inlagd.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("pickup_date")).InnerText = p.hamtning.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("machine")).InnerText = p.maskin.maskinID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("picked_up")).InnerText = p.hamtad.ToString();
+                        xMain.AppendChild(xSub);
+
+                        xDoc.DocumentElement.AppendChild(xMain);
+                    }
+                    xDoc.Save(path);
+                }
+            }
+            catch (SystemException ex) { System.Windows.Forms.MessageBox.Show(ex.ToString(), "Fel - sparning", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
     }
 }

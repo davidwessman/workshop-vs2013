@@ -23,8 +23,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>7</ApplicationRevision>
-    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -49,10 +49,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>D653E612A1DAA82CCCE7DCFF75E492F8E421B095</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>ED55945C6582E0990076F1FF9702FBE51CD825E9</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Verkstadsprogram 2014_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Verkstadsprogram 2014_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -377,6 +377,7 @@
     <None Include="VerkstadsdatabasDataSet.xss">
       <DependentUpon>VerkstadsdatabasDataSet.xsd</DependentUpon>
     </None>
+    <None Include="Verkstadsprogram 2014_1_TemporaryKey.pfx" />
     <None Include="Verkstadsprogram 2014_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

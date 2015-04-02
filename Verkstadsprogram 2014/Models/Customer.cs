@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Windows.Forms;
 using System.Text.RegularExpressions; // för MessageBox
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
 using Verkstadsprogram_2014.Models;
 
 namespace Verkstadsprogram_2014
@@ -27,42 +29,26 @@ namespace Verkstadsprogram_2014
         [System.ComponentModel.DisplayName("Epost")]
         public string epost { get; set; }
         [System.ComponentModel.DisplayName("Tillagd")]
-        public DateTime inlagd { get; set; }        
+        public DateTime inlagd { get; set; }
         [System.ComponentModel.DisplayName("Aktuell")]
         public bool aktuell { get; set; }
-        public List<Maskin> maskiner { get; set; }       
+        public List<Maskin> maskiner { get; set; }
         public bool foretag { get; set; }
         [System.ComponentModel.DisplayName("Org.nr.")]
         public string orgNr { get; set; }
         [System.ComponentModel.DisplayName("Företagsnamn")]
-        public string foretagsnamn { get; set;}
-        
+        public string foretagsnamn { get; set; }
+
         #endregion
 
         #region Konstruktorer
-        public Customer(string namnet, string efternamn, string phone, string epost,string leveransadress, string fakturaadress, bool foretag, string orgNr, string foretagsnamn)
+        public Customer(string namnet, string efternamn, string phone, string epost, string leveransadress, string fakturaadress, bool foretag, string orgNr, string foretagsnamn)
         {
             this.firstNamn = namnet;
             this.lastNamn = efternamn;
             this.phone = phone;
             this.leveransadress = new Adress(leveransadress);
-            this.fakturaadress = new Adress(fakturaadress);          
-            this.epost = epost;
-            this.inlagd = DateTime.Now;
-            this.customerID = Customer.nextCustomerID();            
-            this.aktuell = false;
-            this.maskiner = new List<Maskin>();
-            this.foretag = foretag;
-            this.orgNr = orgNr;
-            this.foretagsnamn = foretagsnamn;                        
-        }
-        public Customer(string namnet, string efternamn, string phone, string epost, string adress1,string adress2, string postnr, string postort, bool foretag,string orgNr, string foretagsNamn)
-        {
-            this.firstNamn = namnet;
-            this.lastNamn = efternamn;
-            this.phone = phone;
-            this.leveransadress = new Adress(adress1,adress2,postnr,postort);
-            this.fakturaadress = new Adress(adress1,adress2, postnr, postort);
+            this.fakturaadress = new Adress(fakturaadress);
             this.epost = epost;
             this.inlagd = DateTime.Now;
             this.customerID = Customer.nextCustomerID();
@@ -70,7 +56,23 @@ namespace Verkstadsprogram_2014
             this.maskiner = new List<Maskin>();
             this.foretag = foretag;
             this.orgNr = orgNr;
-            this.foretagsnamn = foretagsnamn;  
+            this.foretagsnamn = foretagsnamn;
+        }
+        public Customer(string namnet, string efternamn, string phone, string epost, string adress1, string adress2, string postnr, string postort, bool foretag, string orgNr, string foretagsNamn)
+        {
+            this.firstNamn = namnet;
+            this.lastNamn = efternamn;
+            this.phone = phone;
+            this.leveransadress = new Adress(adress1, adress2, postnr, postort);
+            this.fakturaadress = new Adress(adress1, adress2, postnr, postort);
+            this.epost = epost;
+            this.inlagd = DateTime.Now;
+            this.customerID = Customer.nextCustomerID();
+            this.aktuell = false;
+            this.maskiner = new List<Maskin>();
+            this.foretag = foretag;
+            this.orgNr = orgNr;
+            this.foretagsnamn = foretagsnamn;
         }
         public Customer(string customerID, string namnet, string efternamn, string phone, string epost, string leveransadress, string fakturaadress, DateTime inlagd, bool aktuell, bool foretag, string orgNr, string foretagsnamn)
         {
@@ -79,9 +81,9 @@ namespace Verkstadsprogram_2014
             this.lastNamn = efternamn;
             this.phone = phone;
             this.leveransadress = new Adress(leveransadress);
-            this.fakturaadress = new Adress(fakturaadress); 
+            this.fakturaadress = new Adress(fakturaadress);
             this.epost = epost;
-            this.inlagd = inlagd;            
+            this.inlagd = inlagd;
             this.aktuell = false;
             this.maskiner = new List<Maskin>();
             this.foretag = foretag;
@@ -96,9 +98,9 @@ namespace Verkstadsprogram_2014
             this.phone = String.Empty;
             this.epost = String.Empty;
             this.leveransadress = new Adress();
-            this.fakturaadress = new Adress();            
-            this.inlagd = DateTime.Now;            
-            this.maskiner = new List<Maskin>();            
+            this.fakturaadress = new Adress();
+            this.inlagd = DateTime.Now;
+            this.maskiner = new List<Maskin>();
             this.foretag = false;
             this.orgNr = String.Empty;
             this.foretagsnamn = String.Empty;
@@ -107,37 +109,37 @@ namespace Verkstadsprogram_2014
         public string LeveransAdress1
         {
             get { return leveransadress.adress1; }
-            set { leveransadress = new Adress(value,leveransadress.adress2,leveransadress.postnummer,leveransadress.postort); }
+            set { leveransadress = new Adress(value, leveransadress.adress2, leveransadress.postnummer, leveransadress.postort); }
         }
         public string LeveransAdress2
         {
             get { return leveransadress.adress2; }
-            set { leveransadress = new Adress(leveransadress.adress1,value, leveransadress.postnummer, leveransadress.postort); }
+            set { leveransadress = new Adress(leveransadress.adress1, value, leveransadress.postnummer, leveransadress.postort); }
         }
         public string LeveransPostnr
         {
             get { return leveransadress.postnummer; }
-            set { leveransadress = new Adress(leveransadress.adress1,leveransadress.adress2, value, leveransadress.postort); }
+            set { leveransadress = new Adress(leveransadress.adress1, leveransadress.adress2, value, leveransadress.postort); }
         }
         public string LeveransPostort
         {
             get { return leveransadress.postort; }
-            set { leveransadress = new Adress(leveransadress.adress1,leveransadress.adress2, leveransadress.postnummer, value); }
+            set { leveransadress = new Adress(leveransadress.adress1, leveransadress.adress2, leveransadress.postnummer, value); }
         }
         public string FakturaAdress1
         {
             get { return fakturaadress.adress1; }
-            set { fakturaadress = new Adress(value,fakturaadress.adress2,fakturaadress.postnummer, fakturaadress.postort); }
+            set { fakturaadress = new Adress(value, fakturaadress.adress2, fakturaadress.postnummer, fakturaadress.postort); }
         }
         public string FakturaAdress2
         {
             get { return fakturaadress.adress2; }
-            set { fakturaadress = new Adress(fakturaadress.adress1,value, fakturaadress.postnummer, fakturaadress.postort); }
+            set { fakturaadress = new Adress(fakturaadress.adress1, value, fakturaadress.postnummer, fakturaadress.postort); }
         }
         public string FakturaPostnr
         {
             get { return fakturaadress.postnummer; }
-            set { fakturaadress = new Adress(leveransadress.adress1,leveransadress.adress2, value, fakturaadress.postort); }
+            set { fakturaadress = new Adress(leveransadress.adress1, leveransadress.adress2, value, fakturaadress.postort); }
         }
         public string FakturaPostort
         {
@@ -157,8 +159,8 @@ namespace Verkstadsprogram_2014
         public bool Add()
         {
             bool add = false;
-            if(Databas.searchCustomerID(this.customerID) == null)
-            {                
+            if (Databas.searchCustomerID(this.customerID) == null)
+            {
                 Databas.addCustomer(this);
                 add = true;
                 Variables.mode.plusKundnummer();
@@ -166,9 +168,9 @@ namespace Verkstadsprogram_2014
             return add;
         }
         public void Update()
-        {                        
+        {
             Databas.updateCustomer(this);
-            foreach(Maskin a in maskiner)
+            foreach (Maskin a in maskiner)
             {
                 a.Update();
             }
@@ -180,8 +182,8 @@ namespace Verkstadsprogram_2014
         public void Remove()
         {
             this.Load();
-            if(maskiner != null && maskiner.Count > 0)
-                foreach(Maskin a in maskiner)
+            if (maskiner != null && maskiner.Count > 0)
+                foreach (Maskin a in maskiner)
                 {
                     a.Remove();
                 }
@@ -196,32 +198,32 @@ namespace Verkstadsprogram_2014
         public bool hasMachine(Maskin maskin)
         {
             bool check = false;
-            if(maskin != null)
+            if (maskin != null)
             {
                 foreach (Maskin search in this.maskiner)
                 {
                     if (maskin.Equals(search))
                     {
-                        check = true;                        
+                        check = true;
                     }
                 }
             }
-            
+
             return check;
         }
         public Maskin AddMachine(Maskin maskin)
-        {            
-            if(maskin != null && !hasMachine(maskin))
+        {
+            if (maskin != null && !hasMachine(maskin))
             {
                 maskin.customerID = this.customerID;
-                maskin.maskinID = this.customerID + "-" + (this.maskiner.Count+1).ToString().PadLeft(2, '0');
+                maskin.maskinID = this.customerID + "-" + (this.maskiner.Count + 1).ToString().PadLeft(2, '0');
                 this.maskiner.Add(maskin);
-                maskin.Add();                
+                maskin.Add();
                 this.Update();
-                
+
                 return maskin;
             }
-            return null;                            
+            return null;
         }
         private List<Maskin> Maskiner()
         {
@@ -277,15 +279,16 @@ namespace Verkstadsprogram_2014
             }
             return postnr;
         }
-        public static BindingList<Customer> getCustomers(bool aktuell) 
+        public static BindingList<Customer> getCustomers(bool aktuell)
         {
             return Databas.getCustomers(aktuell);
         }
         public static Customer Find(string customerID)
         {
-           return (Databas.searchCustomer(customerID)).FirstOrDefault<Customer>();
-        }        
-        public static List<Customer> Search(string text)        {
+            return (Databas.searchCustomer(customerID)).FirstOrDefault<Customer>();
+        }
+        public static List<Customer> Search(string text)
+        {
 
             List<Customer> search = Databas.searchCustomer(text);
             if (search.Count == 0)
@@ -303,23 +306,22 @@ namespace Verkstadsprogram_2014
                         }
                     }
                 }
-            }           
+            }
             return search;
         }
-       
-         public static string nextCustomerID()
+        public static string nextCustomerID()
         {
             return DateTime.Now.ToString("yy") + "-" + Variables.mode.kundnummer.ToString().PadLeft(3, '0');
         }
         #endregion
         //Använda som displaymember istället för att overrida ToString()
         public string Display
-         {
-             get
-             {
-                 return (customerID + " - " + firstNamn + " " + lastNamn);
-             }
-         }
+        {
+            get
+            {
+                return (customerID + " - " + firstNamn + " " + lastNamn);
+            }
+        }
         public override string ToString()
         {
             return (customerID + " - " + firstNamn + " " + lastNamn);
@@ -328,7 +330,7 @@ namespace Verkstadsprogram_2014
         {
             return (other != null &&
                     other.leveransadress.Equals(this.leveransadress) &&
-                    other.fakturaadress.Equals(this.fakturaadress) &&                    
+                    other.fakturaadress.Equals(this.fakturaadress) &&
                     other.epost.Equals(this.epost) &&
                     other.firstNamn.Equals(this.firstNamn) &&
                     other.lastNamn.Equals(this.lastNamn) &&
@@ -340,7 +342,7 @@ namespace Verkstadsprogram_2014
         public override bool Equals(object obj)
         {
             Customer customer = obj as Customer;
-            if(customer != null)
+            if (customer != null)
             {
                 return Equals(customer);
             }
@@ -357,24 +359,100 @@ namespace Verkstadsprogram_2014
 
             return this.customerID.GetHashCode();
         }
-    }
-    public struct Adress
-    {
-        public string adress1;
-        public string adress2;
-        public string postnummer;
-        public string postort;        
-        public Adress(string adress)
+        public static void export()
         {
-            string[] splitt = adress.Split('€');
-            
-            if(splitt.Length == 4)
+            BindingList<Customer> list = Databas.getCustomers(false);
+            try
             {
-                this.adress1 = splitt[0];
-                this.adress2 = splitt[1];
-                this.postnummer = splitt[2];
-                this.postort = splitt[3];
-                if((String.IsNullOrEmpty(this.adress1) && String.IsNullOrEmpty(this.adress2)) || String.IsNullOrEmpty(this.postnummer) || String.IsNullOrEmpty(this.postort))
+                XmlDocument xDoc = new XmlDocument();
+                FolderBrowserDialog f = new FolderBrowserDialog();
+                DialogResult result = f.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string path = f.SelectedPath + "\\customers.xml";                    
+                    if (!File.Exists(path))
+                    {
+                        XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8);
+                        xml.WriteStartElement("customers");
+                        xml.WriteEndElement();
+                        xml.Close();
+                    }
+                    xDoc.Load(path);
+                    XmlNode xNode = xDoc.SelectSingleNode("customers");
+                    xNode.RemoveAll();
+
+                    foreach (Customer p in list)
+                    {
+                        XmlNode xMain, xSub;
+                        xMain = xDoc.CreateElement("customer");
+
+                        (xSub = xDoc.CreateElement("id")).InnerText = p.customerID;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("firstname")).InnerText = p.firstNamn;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("lastname")).InnerText = p.lastNamn;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("phone")).InnerText = p.phone;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("email")).InnerText = p.epost;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("deliveryaddress")).InnerText = p.leveransadress.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("invoiceaddress")).InnerText = p.fakturaadress.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("created")).InnerText = p.inlagd.ToShortDateString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("foretag")).InnerText = p.foretag.ToString();
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("organization")).InnerText = p.orgNr;
+                        xMain.AppendChild(xSub);
+
+                        (xSub = xDoc.CreateElement("foretagsnamn")).InnerText = p.foretagsnamn;
+                        xMain.AppendChild(xSub);
+
+                        xDoc.DocumentElement.AppendChild(xMain);
+                    }
+                    xDoc.Save(path);
+                }
+            }
+            catch (SystemException ex) { System.Windows.Forms.MessageBox.Show(ex.ToString(), "Fel - sparning", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+
+    }
+        public struct Adress
+        {
+            public string adress1;
+            public string adress2;
+            public string postnummer;
+            public string postort;
+            public Adress(string adress)
+            {
+                string[] splitt = adress.Split('€');
+
+                if (splitt.Length == 4)
+                {
+                    this.adress1 = splitt[0];
+                    this.adress2 = splitt[1];
+                    this.postnummer = splitt[2];
+                    this.postort = splitt[3];
+                    if ((String.IsNullOrEmpty(this.adress1) && String.IsNullOrEmpty(this.adress2)) || String.IsNullOrEmpty(this.postnummer) || String.IsNullOrEmpty(this.postort))
+                    {
+                        this.adress1 = String.Empty;
+                        this.adress2 = String.Empty;
+                        this.postnummer = String.Empty;
+                        this.postort = String.Empty;
+                    }
+                }
+                else
                 {
                     this.adress1 = String.Empty;
                     this.adress2 = String.Empty;
@@ -382,28 +460,21 @@ namespace Verkstadsprogram_2014
                     this.postort = String.Empty;
                 }
             }
-            else
+            public Adress(string adress1, string adress2, string postnummer, string postort)
             {
-                this.adress1 = String.Empty;
-                this.adress2 = String.Empty;
-                this.postnummer = String.Empty;
-                this.postort = String.Empty;
+                this.adress1 = adress1;
+                this.adress2 = adress2;
+                this.postnummer = Customer.PostnummerFix(postnummer);
+                this.postort = postort;
+            }
+            public string Save()
+            {
+                return this.adress1 + "€" + "€" + this.postnummer + "€" + this.postort;
+            }
+            public override string ToString()
+            {
+                return adress1 + " " + adress2 + ", " + postnummer + ", " + postort;
             }
         }
-        public Adress(string adress1,string adress2,string postnummer,string postort)
-        {
-            this.adress1 = adress1;
-            this.adress2 = adress2;
-            this.postnummer = Customer.PostnummerFix(postnummer);
-            this.postort = postort;
-        }        
-        public string Save()
-        {
-            return this.adress1 + "€" + "€" + this.postnummer + "€" + this.postort;
-        }
-        public override string ToString()
-        {
-            return adress1 +" "+adress2+ ", " + postnummer + ", " + postort;
-        }
-    }
+    
 }
